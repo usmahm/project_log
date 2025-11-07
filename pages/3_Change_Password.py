@@ -40,10 +40,7 @@ with st.expander("📋 Password Requirements", expanded=False):
     st.markdown("""
     Your new password must meet the following criteria:
 
-    - At least 8 characters long
-    - Contains at least one uppercase letter
-    - Contains at least one lowercase letter
-    - Contains at least one number
+    - At least 5 characters long
     - Different from your current password
 
     **Tips for a strong password:**
@@ -53,6 +50,10 @@ with st.expander("📋 Password Requirements", expanded=False):
     - Consider using a passphrase (e.g., "Coffee!Morning2024")
     """)
 
+    # - Contains at least one uppercase letter
+    # - Contains at least one lowercase letter
+    # - Contains at least one number
+    
 # Main form
 col1, col2 = st.columns([2, 1])
 
@@ -105,17 +106,17 @@ with col1:
                 errors.append("New password must be different from current password")
 
             # Password strength validation
-            if len(new_password) < 8:
-                errors.append("Password must be at least 8 characters long")
+            if len(new_password) < 5:
+                errors.append("Password must be at least 5 characters long")
 
-            if not any(c.isupper() for c in new_password):
-                errors.append("Password must contain at least one uppercase letter")
+            # if not any(c.isupper() for c in new_password):
+            #     errors.append("Password must contain at least one uppercase letter")
 
-            if not any(c.islower() for c in new_password):
-                errors.append("Password must contain at least one lowercase letter")
+            # if not any(c.islower() for c in new_password):
+            #     errors.append("Password must contain at least one lowercase letter")
 
-            if not any(c.isdigit() for c in new_password):
-                errors.append("Password must contain at least one number")
+            # if not any(c.isdigit() for c in new_password):
+            #     errors.append("Password must contain at least one number")
 
             # Display errors or update password
             if errors:

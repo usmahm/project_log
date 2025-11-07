@@ -101,7 +101,7 @@ else:
             with detail_col1:
                 st.markdown("#### Log Content")
                 st.markdown(f"""
-                <div style="background-color: #f0f2f6; padding: 15px; border-radius: 5px; white-space: pre-wrap;">
+                <div style="background-color: #1e1e1e; color: #e0e0e0; padding: 15px; border-radius: 5px; white-space: pre-wrap; border-left: 4px solid {status_color};">
 {log['content']}
                 </div>
                 """, unsafe_allow_html=True)
