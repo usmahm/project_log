@@ -4,13 +4,9 @@ Database utility for MongoDB operations.
 This module handles all database connections and CRUD operations.
 """
 
-import os
+import streamlit as st
 from datetime import datetime
 from pymongo import MongoClient
-from dotenv import load_dotenv
-
-# Load environment variables from .env file
-load_dotenv()
 
 # MongoDB connection
 def get_database():
@@ -20,11 +16,11 @@ def get_database():
     Returns:
         database: MongoDB database object
     """
-    # Get MongoDB URI from environment variable
-    mongodb_uri = os.getenv("MONGODB_URI")
-
-    if not mongodb_uri:
-        raise ValueError("MONGODB_URI not found in environment variables")
+    # Get MongoDB URI from Streamlit secrets
+    try:
+        mongodb_uri = st.secrets["MONGODB_URI"]
+    except (KeyError, FileNotFoundError):
+        raise ValueError("MONGODB_URI not found in Streamlit secrets. Please configure secrets.toml")
 
     # Create MongoDB client
     client = MongoClient(mongodb_uri)

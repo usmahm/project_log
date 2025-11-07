@@ -2,5 +2,4 @@ streamlit
 pymongo[srv]  # MongoDB driver (srv for MongoDB Atlas)
 pandas  # Data manipulation
 bcrypt  # Password hashing
-python-dotenv  # Environment variables management
 dnspython  # Required for MongoDB Atlas connection

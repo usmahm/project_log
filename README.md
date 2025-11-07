@@ -57,23 +57,28 @@ Since Google requires 2-factor authentication for apps, you need an "App Passwor
    - Name it "Project Logging System"
    - Copy the 16-character password
 
-### 4. Configure Environment Variables
+### 4. Configure Secrets (Streamlit Secrets Management)
 
-1. Copy the example file:
+Streamlit uses a special `secrets.toml` file for managing sensitive configuration.
+
+1. Create the secrets file:
    ```bash
-   cp .env.example .env
+   cp .streamlit/secrets.toml.example .streamlit/secrets.toml
    ```
 
-2. Edit `.env` and fill in your credentials:
-   ```env
-   MONGODB_URI=mongodb+srv://your-username:your-password@cluster.mongodb.net/project_logs?retryWrites=true&w=majority
-   GMAIL_USER=your-email@gmail.com
-   GMAIL_APP_PASSWORD=your-16-char-app-password
-   APP_URL=http://localhost:8501
-   SECRET_KEY=your-random-secret-key-here
+2. Edit `.streamlit/secrets.toml` and fill in your credentials:
+   ```toml
+   MONGODB_URI = "mongodb+srv://your-username:your-password@cluster.mongodb.net/project_logs?retryWrites=true&w=majority"
+   GMAIL_USER = "your-email@gmail.com"
+   GMAIL_APP_PASSWORD = "your-16-char-app-password"
+   APP_URL = "http://localhost:8501"
+   SECRET_KEY = "your-random-secret-key-here"
    ```
 
-   **Note**: For `SECRET_KEY`, generate a random string (e.g., run `python -c "import secrets; print(secrets.token_hex(32))"`)
+   **Notes**:
+   - For `SECRET_KEY`, generate a random string: `python -c "import secrets; print(secrets.token_hex(32))"`
+   - Never commit `secrets.toml` to git (it's already in `.gitignore`)
+   - When deployed to Streamlit Community Cloud, paste these secrets in the app settings
 
 ### 5. Run the Application
 
@@ -121,8 +126,9 @@ project_log/
 │   ├── database.py           # MongoDB operations
 │   ├── auth.py               # Authentication & password handling
 │   └── email_sender.py       # Email functionality
+├── .streamlit/
+│   └── secrets.toml.example # Secrets configuration template
 ├── requirements.txt          # Python dependencies
-├── .env.example             # Environment template
 └── README.md                # This file
 ```
 
@@ -148,25 +154,66 @@ project_log/
 4. Updates status to "approved" or "rejected"
 5. Student sees updated status in dashboard
 
+## Deploying to Streamlit Community Cloud
+
+1. **Push to GitHub**:
+   ```bash
+   git add .
+   git commit -m "Initial commit"
+   git push origin main
+   ```
+
+2. **Deploy on Streamlit Cloud**:
+   - Go to [share.streamlit.io](https://share.streamlit.io)
+   - Sign in with GitHub
+   - Click "New app"
+   - Select your repository and branch
+   - Set main file: `streamlit_app.py`
+
+3. **Configure Secrets**:
+   - Click "Advanced settings" before deploying (or go to app settings after)
+   - Paste the contents of your `.streamlit/secrets.toml` file into the secrets section
+   - Format should be TOML (same as your local file):
+   ```toml
+   MONGODB_URI = "mongodb+srv://..."
+   GMAIL_USER = "your-email@gmail.com"
+   GMAIL_APP_PASSWORD = "your-app-password"
+   APP_URL = "https://your-app-name.streamlit.app"
+   SECRET_KEY = "your-secret-key"
+   ```
+
+   **Important**: Update `APP_URL` to your deployed app's URL (e.g., `https://your-app-name.streamlit.app`)
+
+4. **Click Deploy!**
+
+Your app will be live at `https://your-app-name.streamlit.app`
+
 ## Troubleshooting
 
 ### Email Not Sending
 
-1. Check .env file for GMAIL_USER and GMAIL_APP_PASSWORD
+1. Check secrets.toml for GMAIL_USER and GMAIL_APP_PASSWORD
 2. Verify App Password is 16 characters, no spaces
 3. Ensure 2-factor authentication is enabled on Gmail
 4. Use Admin → Test Email to diagnose
 
 ### MongoDB Connection Failed
 
-1. Check MongoDB URI format in .env
-2. In MongoDB Atlas, add your IP to Network Access
+1. Check MongoDB URI format in secrets.toml
+2. In MongoDB Atlas, add `0.0.0.0/0` to Network Access (for Streamlit Cloud deployment)
 3. Verify database user credentials
 
 ### Module Not Found
 
 ```bash
 pip install -r requirements.txt
+```
+
+### Secrets Not Found (Local Development)
+
+Make sure you have created `.streamlit/secrets.toml` from the example file:
+```bash
+cp .streamlit/secrets.toml.example .streamlit/secrets.toml
 ```
 
 ## Security Features

@@ -114,7 +114,7 @@ def main():
     """
     # Sidebar
     with st.sidebar:
-        st.image("https://via.placeholder.com/150x50/3498db/ffffff?text=Logo", use_container_width=True)
+        # st.image("https://via.placeholder.com/150x50/3498db/ffffff?text=Logo", use_container_width=True)
 
         if is_logged_in():
             st.success(f"Logged in as: {st.session_state.get('username')}")

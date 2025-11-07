@@ -4,15 +4,12 @@ Email sending utilities for supervisor notifications.
 This module handles sending verification emails to supervisors.
 """
 
-import os
+import streamlit as st
 import smtplib
 import secrets
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
-from dotenv import load_dotenv
 from utils.database import update_log_verification_token
-
-load_dotenv()
 
 
 def generate_verification_token():
@@ -56,8 +53,8 @@ def send_verification_email(log_id, student_name, student_email, supervisor_emai
         # Store token in database
         update_log_verification_token(log_id, token)
 
-        # Get app URL from environment
-        app_url = os.getenv("APP_URL", "http://localhost:8501")
+        # Get app URL from Streamlit secrets
+        app_url = st.secrets.get("APP_URL", "http://localhost:8501")
 
         # Create verification links
         # These will be handled by a special Streamlit page
@@ -150,7 +147,7 @@ This is an automated email from the Project Logging System.
         # Create message
         message = MIMEMultipart('alternative')
         message['Subject'] = subject
-        message['From'] = os.getenv("GMAIL_USER")
+        message['From'] = st.secrets["GMAIL_USER"]
         message['To'] = supervisor_email
 
         # Attach both plain and HTML versions
@@ -160,11 +157,11 @@ This is an automated email from the Project Logging System.
         message.attach(part2)
 
         # Send email via Gmail SMTP
-        gmail_user = os.getenv("GMAIL_USER")
-        gmail_password = os.getenv("GMAIL_APP_PASSWORD")
+        gmail_user = st.secrets.get("GMAIL_USER")
+        gmail_password = st.secrets.get("GMAIL_APP_PASSWORD")
 
         if not gmail_user or not gmail_password:
-            return False, "Email credentials not configured"
+            return False, "Email credentials not configured in secrets"
 
         # Connect to Gmail's SMTP server
         with smtplib.SMTP_SSL('smtp.gmail.com', 465) as server:
@@ -193,11 +190,11 @@ def send_test_email(recipient_email):
 
         message = MIMEText(body)
         message['Subject'] = subject
-        message['From'] = os.getenv("GMAIL_USER")
+        message['From'] = st.secrets["GMAIL_USER"]
         message['To'] = recipient_email
 
-        gmail_user = os.getenv("GMAIL_USER")
-        gmail_password = os.getenv("GMAIL_APP_PASSWORD")
+        gmail_user = st.secrets.get("GMAIL_USER")
+        gmail_password = st.secrets.get("GMAIL_APP_PASSWORD")
 
         with smtplib.SMTP_SSL('smtp.gmail.com', 465) as server:
             server.login(gmail_user, gmail_password)
