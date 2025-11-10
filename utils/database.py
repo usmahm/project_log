@@ -29,8 +29,94 @@ def get_database():
     return client['project_logs']
 
 
+# Admin operations
+def create_admin(username, password_hash, name, email, department, role="department_admin"):
+    """
+    Creates a new admin in the database.
+
+    Args:
+        username: Admin's unique username
+        password_hash: Hashed password
+        name: Admin's full name
+        email: Admin's email address
+        department: Department code/name (e.g., "CS", "ENG", "BIO")
+        role: Either "super_admin" or "department_admin"
+
+    Returns:
+        str: The inserted admin's ID
+    """
+    db = get_database()
+
+    admin_data = {
+        "username": username,
+        "password": password_hash,
+        "name": name,
+        "email": email,
+        "department": department,
+        "role": role,  # super_admin or department_admin
+        "created_at": datetime.now(),
+        "must_change_password": True
+    }
+
+    result = db.admins.insert_one(admin_data)
+    return str(result.inserted_id)
+
+
+def get_admin_by_username(username):
+    """
+    Retrieves an admin by their username.
+
+    Args:
+        username: The admin's username
+
+    Returns:
+        dict: Admin document or None if not found
+    """
+    db = get_database()
+    return db.admins.find_one({"username": username})
+
+
+def get_all_admins(department=None):
+    """
+    Retrieves all admins, optionally filtered by department.
+
+    Args:
+        department: Optional department filter
+
+    Returns:
+        list: List of admin documents
+    """
+    db = get_database()
+    query = {"department": department} if department else {}
+    return list(db.admins.find(query))
+
+
+def update_admin_password(username, new_password_hash):
+    """
+    Updates an admin's password.
+
+    Args:
+        username: Admin's username
+        new_password_hash: New hashed password
+
+    Returns:
+        bool: True if updated successfully
+    """
+    db = get_database()
+    result = db.admins.update_one(
+        {"username": username},
+        {
+            "$set": {
+                "password": new_password_hash,
+                "must_change_password": False
+            }
+        }
+    )
+    return result.modified_count > 0
+
+
 # Student operations
-def create_student(username, password_hash, name, email, supervisor_email):
+def create_student(username, password_hash, name, email, supervisor_email, department="general"):
     """
     Creates a new student in the database.
 
@@ -40,6 +126,7 @@ def create_student(username, password_hash, name, email, supervisor_email):
         name: Student's full name
         email: Student's email address
         supervisor_email: Email of assigned supervisor
+        department: Department code/name (defaults to "general")
 
     Returns:
         str: The inserted student's ID
@@ -52,6 +139,7 @@ def create_student(username, password_hash, name, email, supervisor_email):
         "name": name,
         "email": email,
         "supervisor_email": supervisor_email,
+        "department": department,
         "created_at": datetime.now(),
         "must_change_password": True  # Force password change on first login
     }
@@ -231,15 +319,19 @@ def get_or_create_supervisor(email, name=None):
 
 
 # Admin operations
-def get_all_students():
+def get_all_students(department=None):
     """
-    Retrieves all students for admin view.
+    Retrieves all students for admin view, optionally filtered by department.
+
+    Args:
+        department: Optional department filter
 
     Returns:
-        list: List of all student documents
+        list: List of student documents
     """
     db = get_database()
-    return list(db.students.find())
+    query = {"department": department} if department else {}
+    return list(db.students.find(query))
 
 
 def check_existing_log(student_username, week_number):

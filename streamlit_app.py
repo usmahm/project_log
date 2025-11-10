@@ -56,7 +56,7 @@ def show_login_page():
         **First time logging in?**
 
         Your account has been created by your administrator.
-        - Username: Your student ID
+        - Username: Your matriculation number
         - Password: Temporary password provided by admin
         - You'll be asked to change your password after first login
         """)

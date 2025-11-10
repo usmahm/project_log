@@ -90,13 +90,32 @@ The app will open in your browser at `http://localhost:8501`
 
 ## Quick Start Guide
 
-### For Administrators
+### Initial Setup (Super Admin)
 
-1. Navigate to the "Admin" page
-2. Download the CSV template
-3. Fill in student information
-4. Upload and import students
-5. Students receive their credentials
+1. **Create the first super admin account:**
+   ```bash
+   python create_super_admin.py
+   ```
+   Follow the prompts to create your super admin credentials.
+
+2. **Login as Super Admin:**
+   - Navigate to "Admin Login" page
+   - Use your super admin credentials
+   - Change password on first login
+
+3. **Create Department Admins:**
+   - Go to "Super Admin" page
+   - Create admin accounts for each department (CS, ENG, etc.)
+   - Each department admin can only manage their department's students
+
+### For Department Administrators
+
+1. Login via "Admin Login" page
+2. Navigate to "Admin Panel"
+3. Download the CSV template
+4. Fill in student information
+5. Upload and import students (they'll automatically be assigned to your department)
+6. View and manage your department's students
 
 ### For Students
 
@@ -115,13 +134,16 @@ The app will open in your browser at `http://localhost:8501`
 
 ```
 project_log/
-├── streamlit_app.py          # Main entry point with login
+├── streamlit_app.py          # Main entry point with student login
+├── create_super_admin.py     # Setup script for initial super admin
 ├── pages/
-│   ├── 1_📝_Submit_Log.py   # Log submission form
-│   ├── 2_📋_View_Logs.py    # View log history
-│   ├── 3_🔐_Change_Password.py
-│   ├── 4_👨‍💼_Admin.py       # Admin panel
-│   └── 5_✅_Verify.py       # Email verification handler
+│   ├── 1_📝_Submit_Log.py   # Log submission form (student)
+│   ├── 2_📋_View_Logs.py    # View log history (student)
+│   ├── 3_🔐_Change_Password.py  # Password management (student)
+│   ├── 4_👨‍💼_Admin.py       # Admin panel (department admin/super admin)
+│   ├── 5_✅_Verify.py       # Email verification handler
+│   ├── 6_🔑_Admin_Login.py  # Admin authentication
+│   └── 7_⭐_Super_Admin.py  # Super admin panel (create dept admins)
 ├── utils/
 │   ├── database.py           # MongoDB operations
 │   ├── auth.py               # Authentication & password handling
@@ -131,6 +153,26 @@ project_log/
 ├── requirements.txt          # Python dependencies
 └── README.md                # This file
 ```
+
+## Admin Hierarchy
+
+The system supports a two-tier admin structure:
+
+### Super Admin
+- **Access**: Full system access across all departments
+- **Can**:
+  - Create and manage department admins
+  - View and manage all students regardless of department
+  - Access all admin features
+- **Created**: Via `create_super_admin.py` script
+
+### Department Admin
+- **Access**: Limited to their assigned department only
+- **Can**:
+  - Upload and manage students in their department
+  - View submissions from their department's students only
+  - Cannot create other admins
+- **Created**: By super admin via Super Admin page
 
 ## How It Works
 

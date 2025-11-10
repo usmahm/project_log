@@ -2,13 +2,12 @@
 Admin Page
 
 This page allows administrators to upload student data via CSV.
-For simplicity, this page doesn't require separate admin authentication.
-In production, you'd want proper admin authentication.
+Requires admin authentication and filters students by department.
 """
 
 import streamlit as st
 import pandas as pd
-from utils.auth import hash_password
+from utils.auth import hash_password, require_admin_login, get_admin_department, get_admin_role, logout_admin
 from utils.database import create_student, get_or_create_supervisor, get_all_students
 
 st.set_page_config(
@@ -17,8 +16,30 @@ st.set_page_config(
     layout="wide"
 )
 
-st.title("👨‍💼 Admin Panel")
-st.markdown("Upload student data and manage the system")
+# Require admin login
+require_admin_login()
+
+# Get admin info
+admin_dept = get_admin_department()
+admin_role = get_admin_role()
+is_super_admin = (admin_role == "super_admin")
+
+# Header with admin info
+col_header1, col_header2 = st.columns([3, 1])
+
+with col_header1:
+    st.title("👨‍💼 Admin Panel")
+    if is_super_admin:
+        st.markdown("Upload student data and manage the system (All Departments)")
+    else:
+        st.markdown(f"Upload student data and manage the system (Department: **{admin_dept}**)")
+
+with col_header2:
+    if st.button("🔓 Logout", key="admin_logout"):
+        logout_admin()
+        st.success("Logged out successfully!")
+        st.rerun()
+
 st.markdown("---")
 
 # Tabs for different admin functions
@@ -132,13 +153,14 @@ with tab1:
                             # Hash password
                             password_hash = hash_password(str(row['password']))
 
-                            # Create student
+                            # Create student (assign to admin's department)
                             create_student(
                                 username=str(row['username']),
                                 password_hash=password_hash,
                                 name=str(row['name']),
                                 email=str(row['email']),
-                                supervisor_email=str(row['supervisor_email'])
+                                supervisor_email=str(row['supervisor_email']),
+                                department=admin_dept
                             )
 
                             success_count += 1
@@ -166,13 +188,20 @@ with tab1:
 
 # TAB 2: View All Students
 with tab2:
-    st.subheader("All Registered Students")
+    if is_super_admin:
+        st.subheader("All Registered Students (All Departments)")
+    else:
+        st.subheader(f"Students in {admin_dept} Department")
 
     try:
-        students = get_all_students()
+        # Filter students by department (unless super admin)
+        if is_super_admin:
+            students = get_all_students()  # Get all students
+        else:
+            students = get_all_students(department=admin_dept)  # Filter by department
 
         if not students:
-            st.info("No students in the system yet. Upload a CSV to get started!")
+            st.info(f"No students in {'the system' if is_super_admin else f'the {admin_dept} department'} yet. Upload a CSV to get started!")
         else:
             # Summary metrics
             col1, col2, col3 = st.columns(3)
